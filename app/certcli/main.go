@@ -20,6 +20,7 @@ func main() {
 	for command, fn := range cmdMap {
 		if args[0] == command {
 			fn(command, args[1:])
+			return
 		}
 	}
 	fmt.Printf("Unrecognized command '%s'\n", args[0])

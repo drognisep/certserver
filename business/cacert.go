@@ -40,17 +40,17 @@ func CaExpirationDays(days int) CaCertOpt {
 	}
 }
 
-//func AddIpAddress(ip net.IP) CaCertOpt {
-//	return func(opts *CaCertOpts) {
-//		opts.IpAddresses = append(opts.IpAddresses, ip)
-//	}
-//}
-//
-//func AddSubjectAlternativeName(name string) CaCertOpt {
-//	return func(opts *CaCertOpts) {
-//		opts.SANs = append(opts.SANs, name)
-//	}
-//}
+func CaIpAddress(ip net.IP) CaCertOpt {
+	return func(opts *CaCertOpts) {
+		opts.IpAddresses = append(opts.IpAddresses, ip)
+	}
+}
+
+func CaSubjectAlternativeName(name string) CaCertOpt {
+	return func(opts *CaCertOpts) {
+		opts.SANs = append(opts.SANs, name)
+	}
+}
 
 func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byte, key []byte, err error) {
 	caOpts := CaCertOpts{
@@ -84,6 +84,8 @@ func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byt
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
+		DNSNames:              caOpts.SANs,
+		IPAddresses:           caOpts.IpAddresses,
 	}
 
 	return generateCaCertAndKeys(err, caOpts.KeyBits, &caCert)

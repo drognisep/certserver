@@ -83,10 +83,8 @@ var (
 Discovered {{if .IsCA }}CA{{else}}Server{{end}} cert
 Common Name:     {{ .Subject.CommonName }}
 S/N:             {{ .SerialNumber }}
-{{- if not .IsCA}}
 SANs:            {{ .DNSNames }}
 IPs:             {{ .IPAddresses }}
-{{- end}}
 
 Effective:       {{ .NotBefore.String }}
 Expiration:      {{ .NotAfter.String }}
