@@ -68,6 +68,7 @@ func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byt
 	}
 	var serial big.Int
 	serial.SetBytes(serialBytes)
+	caOpts.Name.SerialNumber = serial.String()
 
 	caCert := x509.Certificate{
 		SerialNumber:          &serial,
@@ -93,7 +94,7 @@ func generateCaCertAndKeys(err error, keyBits int, template *x509.Certificate) (
 
 	var pemCert bytes.Buffer
 	err = pem.Encode(&pemCert, &pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  PEM_CERTIFICATE,
 		Bytes: cert,
 	})
 	if err != nil {
@@ -102,7 +103,7 @@ func generateCaCertAndKeys(err error, keyBits int, template *x509.Certificate) (
 
 	var pemKey bytes.Buffer
 	err = pem.Encode(&pemKey, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  PEM_RSA_PRIVATE_KEY,
 		Bytes: x509.MarshalPKCS1PrivateKey(priv),
 	})
 	if err != nil {

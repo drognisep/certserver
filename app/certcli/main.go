@@ -14,6 +14,8 @@ func main() {
 	switch args[0] {
 	case "ca-cert":
 		cacert(args[1:])
+	case "cert-info":
+		certinfo(args[1:])
 	default:
 		log.Fatalf("Unrecognized command '%s'\n", args[0])
 	}

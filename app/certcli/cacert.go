@@ -10,12 +10,13 @@ import (
 )
 
 func cacert(args []string) {
-	flags := pflag.NewFlagSet("ca-cert", pflag.ExitOnError)
+	const commandName = "ca-cert"
+	flags := pflag.NewFlagSet(commandName, pflag.ExitOnError)
 	flags.Usage = func() {
-		fmt.Printf(`Creates a new, self-signed CA cert
+		fmt.Printf(`'%s' creates a new, self-signed CA cert
 
 Flags:
-%s`, flags.FlagUsages())
+%s`, commandName, flags.FlagUsages())
 	}
 
 	var (
