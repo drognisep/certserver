@@ -11,6 +11,12 @@ import (
 
 func cacert(args []string) {
 	flags := pflag.NewFlagSet("ca-cert", pflag.ExitOnError)
+	flags.Usage = func() {
+		fmt.Printf(`Creates a new, self-signed CA cert
+
+Flags:
+%s`, flags.FlagUsages())
+	}
 
 	var (
 		commonName   string
