@@ -13,7 +13,13 @@ func cacert(args []string) {
 	const commandName = "ca-cert"
 	flags := pflag.NewFlagSet(commandName, pflag.ExitOnError)
 	flags.Usage = func() {
-		fmt.Printf(`'%s' creates a new, self-signed CA cert
+		fmt.Printf(`'%[1]s' creates a new, self-signed CA cert
+
+Usage: %[1]s COMMON_NAME
+
+COMMON_NAME:
+  The "CN" field in the certificate. This could be a domain name or another identifying string.
+  If spaces are desired, ensure that they're escaped or grouped properly.
 
 Flags:
 %s`, commandName, flags.FlagUsages())
@@ -27,13 +33,19 @@ Flags:
 		expireDays   int
 	)
 
-	flags.StringVar(&commonName, "common-name", "", "Specifies a common name for the new CA cert (required)")
 	flags.StringVar(&caCertPath, "cert-out", "", "Specifies a different output path for the CA cert. Default is './<common-name>.cer'")
 	flags.StringVar(&caKeyPath, "key-out", "", "Specifies a different output path for the CA key. Default is './<common-name>.key'")
 	if err := flags.Parse(args); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+
+	if flags.NArg() < 1 {
+		fmt.Println("Must pass the common name as an argument")
+		os.Exit(1)
+	}
+	commonName = flags.Arg(0)
+
 	if commonName == "" {
 		fmt.Println("Common name is a required parameter")
 		os.Exit(1)

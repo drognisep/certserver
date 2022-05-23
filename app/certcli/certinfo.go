@@ -11,10 +11,12 @@ func certinfo(args []string) {
 	const commandName = "cert-info"
 	flags := pflag.NewFlagSet(commandName, pflag.ExitOnError)
 	flags.Usage = func() {
-		fmt.Printf(`'%s' parses a PEM or DER encoded cert and displays the info. Requires a path argument pointing to a certificate file.
+		fmt.Printf(`'%[1]s' parses a PEM or DER encoded cert and displays the info. Requires a path argument pointing to a certificate file.
 
-Flags:
-%s`, commandName, flags.FlagUsages())
+Usage: %[1]s FILE [FILE]...
+
+FILE:
+  A file containing a PEM or DER encoded certificate.`, commandName)
 	}
 	if err := flags.Parse(args); err != nil {
 		fmt.Println(err.Error())
