@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -11,12 +12,16 @@ func main() {
 		log.Fatalln("No arguments specified")
 	}
 
-	switch args[0] {
-	case "ca-cert":
-		cacert(args[1:])
-	case "cert-info":
-		certinfo(args[1:])
-	default:
-		log.Fatalf("Unrecognized command '%s'\n", args[0])
+	cmdMap := map[string]func(string, []string){
+		"ca-cert":   cacert,
+		"cert-info": certinfo,
 	}
+
+	for command, fn := range cmdMap {
+		if args[0] == command {
+			fn(command, args[1:])
+		}
+	}
+	fmt.Printf("Unrecognized command '%s'\n", args[0])
+	os.Exit(1)
 }

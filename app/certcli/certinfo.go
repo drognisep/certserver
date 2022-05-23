@@ -7,16 +7,15 @@ import (
 	"os"
 )
 
-func certinfo(args []string) {
-	const commandName = "cert-info"
-	flags := pflag.NewFlagSet(commandName, pflag.ExitOnError)
+func certinfo(command string, args []string) {
+	flags := pflag.NewFlagSet(command, pflag.ExitOnError)
 	flags.Usage = func() {
 		fmt.Printf(`'%[1]s' parses a PEM or DER encoded cert and displays the info. Requires a path argument pointing to a certificate file.
 
 Usage: %[1]s FILE [FILE]...
 
 FILE:
-  A file containing a PEM or DER encoded certificate.`, commandName)
+  A file containing a PEM or DER encoded certificate.`, command)
 	}
 	if err := flags.Parse(args); err != nil {
 		fmt.Println(err.Error())

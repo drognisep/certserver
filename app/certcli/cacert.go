@@ -9,9 +9,8 @@ import (
 	"strings"
 )
 
-func cacert(args []string) {
-	const commandName = "ca-cert"
-	flags := pflag.NewFlagSet(commandName, pflag.ExitOnError)
+func cacert(command string, args []string) {
+	flags := pflag.NewFlagSet(command, pflag.ExitOnError)
 	flags.Usage = func() {
 		fmt.Printf(`'%[1]s' creates a new, self-signed CA cert
 
@@ -22,7 +21,7 @@ COMMON_NAME:
   If spaces are desired, ensure that they're escaped or grouped properly.
 
 Flags:
-%s`, commandName, flags.FlagUsages())
+%s`, command, flags.FlagUsages())
 	}
 
 	var (
