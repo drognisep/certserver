@@ -13,6 +13,11 @@ import (
 	"time"
 )
 
+const (
+	PEM_CERTIFICATE     = "CERTIFICATE"
+	PEM_RSA_PRIVATE_KEY = "RSA PRIVATE KEY"
+)
+
 type CaCertOpts struct {
 	Name           pkix.Name
 	ExpirationDate time.Time

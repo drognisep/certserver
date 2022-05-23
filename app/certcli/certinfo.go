@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/drognisep/certserver/business"
 	"github.com/spf13/pflag"
-	"io/ioutil"
 	"os"
 )
 
@@ -28,13 +27,8 @@ Flags:
 	}
 	paths := flags.Args()
 	for _, path := range paths {
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
-			fmt.Printf("Failed to read file '%s': %v\n", path, err)
-			os.Exit(1)
-		}
-		if err := business.ShowCertDetails(data); err != nil {
-			fmt.Printf("Failed to parse certificate: %v\n", err)
+		if err := business.ShowCertDetails(path); err != nil {
+			fmt.Printf("Failed to show certificate details: %v\n", err)
 			os.Exit(1)
 		}
 	}

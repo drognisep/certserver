@@ -7,31 +7,46 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"text/template"
 )
 
 var (
-	ErrNotACertificate = errors.New("the file is not in a known format or is not a certificate")
+	ErrNotACertificate = errors.New("the file is not in a known format or does not contain a certificate")
 )
 
-const (
-	PEM_CERTIFICATE     = "CERTIFICATE"
-	PEM_RSA_PRIVATE_KEY = "RSA PRIVATE KEY"
-)
-
-func ShowCertDetails(fileBytes []byte) error {
-	decodedBlocks := decodePem(fileBytes)
-	for _, blockBytes := range decodedBlocks {
-		cert, err := decodeCert(blockBytes)
-		if cert == nil || err != nil {
-			return ErrNotACertificate
-		}
-		if err := printCert(cert); err != nil {
-			return err
-		}
+func ShowCertDetails(file string) error {
+	cert, err := LoadCertFromFile(file)
+	if err != nil {
+		return err
+	}
+	if err := printCert(cert); err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func LoadCertFromFile(filepath string) (*x509.Certificate, error) {
+	fileBytes, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	blocks := decodePem(fileBytes)
+
+	var cert *x509.Certificate
+	for _, block := range blocks {
+		var err error
+		cert, err = decodeCert(block)
+		if cert == nil || err != nil {
+			continue
+		}
+		break
+	}
+	if cert == nil {
+		return nil, ErrNotACertificate
+	}
+	return cert, nil
 }
 
 // This will effectively be a no-op if the input bytes are not PEM encoded.

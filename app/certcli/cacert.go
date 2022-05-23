@@ -28,7 +28,7 @@ Flags:
 	)
 
 	flags.StringVar(&commonName, "common-name", "", "Specifies a common name for the new CA cert (required)")
-	flags.StringVar(&caCertPath, "cert-out", "", "Specifies a different output path for the CA cert. Default is './<common-name>.cert'")
+	flags.StringVar(&caCertPath, "cert-out", "", "Specifies a different output path for the CA cert. Default is './<common-name>.cer'")
 	flags.StringVar(&caKeyPath, "key-out", "", "Specifies a different output path for the CA key. Default is './<common-name>.key'")
 	if err := flags.Parse(args); err != nil {
 		fmt.Println(err.Error())
@@ -40,7 +40,7 @@ Flags:
 	}
 	commonName = strings.ReplaceAll(strings.TrimSpace(strings.ToLower(commonName)), " ", "")
 	if caCertPath == "" {
-		caCertPath = commonName + ".cert"
+		caCertPath = commonName + ".cer"
 	}
 	if caKeyPath == "" {
 		caKeyPath = commonName + ".key"
