@@ -1,21 +1,14 @@
 package business
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/pem"
 	"github.com/google/uuid"
 	"math/big"
 	"net"
 	"time"
-)
-
-const (
-	PEM_CERTIFICATE     = "CERTIFICATE"
-	PEM_RSA_PRIVATE_KEY = "RSA PRIVATE KEY"
 )
 
 type CaCertOpts struct {
@@ -106,26 +99,9 @@ func generateCaCertAndKeys(err error, keyBits int, template *x509.Certificate) (
 		return nil, nil, err
 	}
 	cert, err := x509.CreateCertificate(rand.Reader, template, template, priv.Public(), priv)
+	privDer := x509.MarshalPKCS1PrivateKey(priv)
 
-	var pemCert bytes.Buffer
-	err = pem.Encode(&pemCert, &pem.Block{
-		Type:  PEM_CERTIFICATE,
-		Bytes: cert,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var pemKey bytes.Buffer
-	err = pem.Encode(&pemKey, &pem.Block{
-		Type:  PEM_RSA_PRIVATE_KEY,
-		Bytes: x509.MarshalPKCS1PrivateKey(priv),
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return pemCert.Bytes(), pemKey.Bytes(), nil
+	return cert, privDer, nil
 }
 
 func generateRsaKeypair(keyBits int) (*rsa.PrivateKey, error) {

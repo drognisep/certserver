@@ -13,7 +13,7 @@ import (
 func cacert(command string, args []string) {
 	flags := pflag.NewFlagSet(command, pflag.ExitOnError)
 	flags.Usage = func() {
-		fmt.Printf(`'%[1]s' creates a new, self-signed root CA cert
+		fmt.Printf(`'%[1]s' creates a new DER encoded, self-signed root CA cert
 
 Usage: %[1]s [FLAGS] COMMON_NAME
 

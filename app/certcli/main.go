@@ -13,7 +13,7 @@ func main() {
 	}
 
 	cmdMap := map[string]func(string, []string){
-		"ca-cert":   cacert,
+		"root-ca":   cacert,
 		"cert-info": certinfo,
 		"csr":       createCsr,
 	}
