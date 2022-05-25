@@ -63,20 +63,14 @@ func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byt
 		opt(&caOpts)
 	}
 
-	serialUuid, err := uuid.NewRandom()
+	serial, err := generateSerialNumber()
 	if err != nil {
 		return nil, nil, err
 	}
-	serialBytes, err := serialUuid.MarshalBinary()
-	if err != nil {
-		return nil, nil, err
-	}
-	var serial big.Int
-	serial.SetBytes(serialBytes)
 	caOpts.Name.SerialNumber = serial.String()
 
 	caCert := x509.Certificate{
-		SerialNumber:          &serial,
+		SerialNumber:          serial,
 		Subject:               caOpts.Name,
 		NotBefore:             time.Now(),
 		NotAfter:              caOpts.ExpirationDate,
@@ -91,13 +85,27 @@ func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byt
 	return generateCaCertAndKeys(err, caOpts.KeyBits, &caCert)
 }
 
+func generateSerialNumber() (*big.Int, error) {
+	zeroInt := big.NewInt(0)
+	serialUuid, err := uuid.NewRandom()
+	if err != nil {
+		return zeroInt, err
+	}
+	serialBytes, err := serialUuid.MarshalBinary()
+	if err != nil {
+		return zeroInt, err
+	}
+	var serial big.Int
+	serial.SetBytes(serialBytes)
+	return &serial, nil
+}
+
 func generateCaCertAndKeys(err error, keyBits int, template *x509.Certificate) ([]byte, []byte, error) {
-	priv, err := rsa.GenerateKey(rand.Reader, keyBits)
+	priv, err := generateRsaKeypair(keyBits)
 	if err != nil {
 		return nil, nil, err
 	}
-	pub := priv.Public()
-	cert, err := x509.CreateCertificate(rand.Reader, template, template, pub, priv)
+	cert, err := x509.CreateCertificate(rand.Reader, template, template, priv.Public(), priv)
 
 	var pemCert bytes.Buffer
 	err = pem.Encode(&pemCert, &pem.Block{
@@ -118,4 +126,12 @@ func generateCaCertAndKeys(err error, keyBits int, template *x509.Certificate) (
 	}
 
 	return pemCert.Bytes(), pemKey.Bytes(), nil
+}
+
+func generateRsaKeypair(keyBits int) (*rsa.PrivateKey, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, keyBits)
+	if err != nil {
+		return nil, err
+	}
+	return priv, nil
 }

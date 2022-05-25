@@ -15,6 +15,7 @@ func main() {
 	cmdMap := map[string]func(string, []string){
 		"ca-cert":   cacert,
 		"cert-info": certinfo,
+		"csr":       createCsr,
 	}
 
 	for command, fn := range cmdMap {
