@@ -30,12 +30,14 @@ Flags:
 		keyPath    string
 		sans       []string
 		ips        []net.IP
+		clientCert bool
 	)
 
 	flags.StringVar(&csrPath, "csr-out", "", "Specifies a different output path for the CSR. Default is './<common-name>.csr'.")
 	flags.StringVar(&keyPath, "key-out", "", "Specifies a different output path for the private key. Default is './<common-name>.key'.")
-	flags.StringSliceVar(&sans, "san", nil, "Specifies a Subject Alternative Name used for this CSR. At least one of 'san' or 'ip' must be specified.")
-	flags.IPSliceVar(&ips, "ip", nil, "Specifies an IP used for this CSR. At least one of 'san' or 'ip' must be specified.")
+	flags.StringSliceVar(&sans, "san", nil, "Specifies a Subject Alternative Name used for this CSR. At least one of 'san' or 'ip' must be specified, unless 'is-client' is specified.")
+	flags.IPSliceVar(&ips, "ip", nil, "Specifies an IP used for this CSR. At least one of 'san' or 'ip' must be specified, unless 'is-client' is specified.")
+	flags.BoolVar(&clientCert, "is-client", false, "Specifies that this CSR is for client authentication, so no SAN or IP will be allowed")
 	if err := flags.Parse(args); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -43,6 +45,7 @@ Flags:
 
 	if flags.NArg() < 1 {
 		fmt.Println("Must pass the common name as an argument")
+		flags.Usage()
 		os.Exit(1)
 	}
 	commonName = flags.Arg(0)
@@ -52,8 +55,13 @@ Flags:
 	if keyPath == "" {
 		keyPath = commonName + ".key"
 	}
-	if len(sans) == 0 && len(ips) == 0 {
+	if len(sans) == 0 && len(ips) == 0 && !clientCert {
 		fmt.Println("At least one IP and/or SAN must be specified")
+		flags.Usage()
+		os.Exit(1)
+	} else if clientCert && (len(sans) > 0 || len(ips) > 0) {
+		fmt.Println("No SAN or IP is allowed for client authentication")
+		flags.Usage()
 		os.Exit(1)
 	}
 
