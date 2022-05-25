@@ -17,22 +17,22 @@ type csrOpts struct {
 	isCA           bool
 }
 
-type CsrOpt func(opts csrOpts)
+type CsrOpt func(opts *csrOpts)
 
 func CsrAddIP(ip net.IP) CsrOpt {
-	return func(opts csrOpts) {
+	return func(opts *csrOpts) {
 		opts.ipAddresses = append(opts.ipAddresses, ip)
 	}
 }
 
 func CsrAddSan(san string) CsrOpt {
-	return func(opts csrOpts) {
+	return func(opts *csrOpts) {
 		opts.sans = append(opts.sans, san)
 	}
 }
 
 func NewGeneratedCsr(commonName string, name pkix.Name, opts ...CsrOpt) (csr []byte, priv []byte, err error) {
-	_csrOpts := csrOpts{
+	_csrOpts := &csrOpts{
 		name:    name,
 		keyBits: 4096,
 	}

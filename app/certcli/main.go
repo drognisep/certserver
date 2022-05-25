@@ -16,6 +16,7 @@ func main() {
 		"root-ca":   cacert,
 		"cert-info": certinfo,
 		"csr":       createCsr,
+		"sign":      sign,
 	}
 
 	for command, fn := range cmdMap {
