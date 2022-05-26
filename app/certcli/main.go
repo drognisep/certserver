@@ -6,15 +6,20 @@ import (
 	"os"
 )
 
+type cliCommand func(command string, args []string)
+
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
 		log.Fatalln("No arguments specified")
 	}
 
-	cmdMap := map[string]func(string, []string){
-		"ca-cert":   cacert,
+	cmdMap := map[string]cliCommand{
+		"root-ca":   cacert,
 		"cert-info": certinfo,
+		"csr":       createCsr,
+		"sign":      sign,
+		"format":    formatFile,
 	}
 
 	for command, fn := range cmdMap {

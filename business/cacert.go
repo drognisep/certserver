@@ -1,21 +1,14 @@
 package business
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/pem"
 	"github.com/google/uuid"
 	"math/big"
 	"net"
 	"time"
-)
-
-const (
-	PEM_CERTIFICATE     = "CERTIFICATE"
-	PEM_RSA_PRIVATE_KEY = "RSA PRIVATE KEY"
 )
 
 type CaCertOpts struct {
@@ -63,20 +56,14 @@ func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byt
 		opt(&caOpts)
 	}
 
-	serialUuid, err := uuid.NewRandom()
+	serial, err := generateSerialNumber()
 	if err != nil {
 		return nil, nil, err
 	}
-	serialBytes, err := serialUuid.MarshalBinary()
-	if err != nil {
-		return nil, nil, err
-	}
-	var serial big.Int
-	serial.SetBytes(serialBytes)
 	caOpts.Name.SerialNumber = serial.String()
 
 	caCert := x509.Certificate{
-		SerialNumber:          &serial,
+		SerialNumber:          serial,
 		Subject:               caOpts.Name,
 		NotBefore:             time.Now(),
 		NotAfter:              caOpts.ExpirationDate,
@@ -91,31 +78,36 @@ func NewCaCert(commonName string, name pkix.Name, opts ...CaCertOpt) (cert []byt
 	return generateCaCertAndKeys(err, caOpts.KeyBits, &caCert)
 }
 
+func generateSerialNumber() (*big.Int, error) {
+	zeroInt := big.NewInt(0)
+	serialUuid, err := uuid.NewRandom()
+	if err != nil {
+		return zeroInt, err
+	}
+	serialBytes, err := serialUuid.MarshalBinary()
+	if err != nil {
+		return zeroInt, err
+	}
+	var serial big.Int
+	serial.SetBytes(serialBytes)
+	return &serial, nil
+}
+
 func generateCaCertAndKeys(err error, keyBits int, template *x509.Certificate) ([]byte, []byte, error) {
+	priv, err := generateRsaKeypair(keyBits)
+	if err != nil {
+		return nil, nil, err
+	}
+	cert, err := x509.CreateCertificate(rand.Reader, template, template, priv.Public(), priv)
+	privDer := x509.MarshalPKCS1PrivateKey(priv)
+
+	return cert, privDer, nil
+}
+
+func generateRsaKeypair(keyBits int) (*rsa.PrivateKey, error) {
 	priv, err := rsa.GenerateKey(rand.Reader, keyBits)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	pub := priv.Public()
-	cert, err := x509.CreateCertificate(rand.Reader, template, template, pub, priv)
-
-	var pemCert bytes.Buffer
-	err = pem.Encode(&pemCert, &pem.Block{
-		Type:  PEM_CERTIFICATE,
-		Bytes: cert,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var pemKey bytes.Buffer
-	err = pem.Encode(&pemKey, &pem.Block{
-		Type:  PEM_RSA_PRIVATE_KEY,
-		Bytes: x509.MarshalPKCS1PrivateKey(priv),
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return pemCert.Bytes(), pemKey.Bytes(), nil
+	return priv, nil
 }

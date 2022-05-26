@@ -13,7 +13,7 @@ import (
 func cacert(command string, args []string) {
 	flags := pflag.NewFlagSet(command, pflag.ExitOnError)
 	flags.Usage = func() {
-		fmt.Printf(`'%[1]s' creates a new, self-signed CA cert
+		fmt.Printf(`'%[1]s' creates a new DER encoded, self-signed root CA cert
 
 Usage: %[1]s [FLAGS] COMMON_NAME
 
@@ -37,7 +37,7 @@ Flags:
 
 	flags.StringVar(&caCertPath, "cert-out", "", "Specifies a different output path for the CA cert. Default is './<common-name>.cer'")
 	flags.StringVar(&caKeyPath, "key-out", "", "Specifies a different output path for the CA key. Default is './<common-name>.key'")
-	flags.IntVar(&expireMonths, "expire-months", 3, "Specifies the certificate's validity time, in months. This takes precedence over 'expire-days'")
+	flags.IntVar(&expireMonths, "expire-months", 0, "Specifies the certificate's validity time, in months. This takes precedence over 'expire-days'")
 	flags.IntVar(&expireDays, "expire-days", 0, "Specifies the certificate's validity time, in days.")
 	flags.StringSliceVar(&sans, "san", nil, "Specifies a Subject Alternative Name used for this server cert")
 	flags.IPSliceVar(&ips, "ip", nil, "Specifies an IP used for this server cert")
