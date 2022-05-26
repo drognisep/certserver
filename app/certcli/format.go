@@ -30,31 +30,43 @@ Flags:
 	}
 
 	var (
-		sourceFormat string
-		targetFormat string
+		sourceFormat format.Encoding
+		targetFormat format.Encoding
 	)
 
-	flags.StringVar(&sourceFormat, "source", "", "Specifies what format the IN_FILE is in")
-	flags.StringVar(&targetFormat, "target", "", "Specify what format the OUT_FILE should be")
+	flags.Bool("from-der", false, "Specifies that the source format is DER")
+	flags.Bool("from-pem", false, "Specifies that the source format is PEM")
+	flags.Bool("to-der", false, "Specifies that the target format is DER")
+	flags.Bool("to-pem", false, "Specifies that the target format is PEM")
 	if err := flags.Parse(args); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+	flags.Visit(func(flag *pflag.Flag) {
+		switch flag.Name {
+		case "from-der":
+			sourceFormat = format.EncodingDer
+		case "from-pem":
+			sourceFormat = format.EncodingPem
+		case "to-der":
+			targetFormat = format.EncodingDer
+		case "to-pem":
+			targetFormat = format.EncodingPem
+		}
+	})
 
-	if sourceFormat == "" {
+	if sourceFormat == 0 {
 		fmt.Println("Must specify a source format")
 		flags.Usage()
 		os.Exit(1)
 	}
-	if targetFormat == "" {
+	if targetFormat == 0 {
 		fmt.Println("Must specify a target format")
 		flags.Usage()
 		os.Exit(1)
 	}
 
-	targetEncoding := mapEncoding(targetFormat)
-	sourceEncoding := mapEncoding(sourceFormat)
-	if sourceEncoding == targetEncoding {
+	if sourceFormat == targetFormat {
 		fmt.Println("Formats are the same, exiting")
 		os.Exit(0)
 	}
@@ -69,7 +81,7 @@ Flags:
 	case "cert":
 		fallthrough
 	case "certificate":
-		if err := format.Cert(sourceEncoding, targetEncoding, inArg, outArg); err != nil {
+		if err := format.Cert(sourceFormat, targetFormat, inArg, outArg); err != nil {
 			if errors.Is(err, format.ErrCancelOverwrite) {
 				fmt.Println(err.Error())
 				os.Exit(0)
@@ -80,7 +92,7 @@ Flags:
 	case "key":
 		fallthrough
 	case "private_key":
-		if err := format.Key(sourceEncoding, targetEncoding, inArg, outArg); err != nil {
+		if err := format.Key(sourceFormat, targetFormat, inArg, outArg); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
@@ -88,18 +100,4 @@ Flags:
 		fmt.Printf("Unknown file type '%s'", typeArg)
 		os.Exit(1)
 	}
-}
-
-func mapEncoding(targetFormat string) format.Encoding {
-	var targetEncoding format.Encoding
-	switch strings.ToLower(targetFormat) {
-	case "der":
-		targetEncoding = format.EncodingDer
-	case "pem":
-		targetEncoding = format.EncodingPem
-	default:
-		fmt.Printf("Unknown target format '%s'\n", targetFormat)
-		os.Exit(1)
-	}
-	return targetEncoding
 }

@@ -15,7 +15,7 @@ import (
 type Encoding int
 
 const (
-	EncodingDer Encoding = iota
+	EncodingDer Encoding = iota + 1
 	EncodingPem
 )
 
