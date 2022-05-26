@@ -17,11 +17,11 @@ See the command listing below for more details.
 Usage: certcli COMMAND [FLAGS]... [ARGS]...
 
 COMMAND:
-  root-ca:   Generates a root, self-signed CA.
-  cert-info: View the details of a PEM or DER encoded certificate.
-  csr:       Generate a CSR with provided details.
-  sign:      Sign a CSR with a given CA cert and key and create a client cert, server cert, or sub-CA.
-  format:    Change the encoding of a certificate or private key between PEM and DER.
+  root-ca   Generates a root, self-signed CA.
+  cert-info View the details of a PEM or DER encoded certificate.
+  csr       Generate a CSR with provided details.
+  sign      Sign a CSR with a given CA cert and key and create a client cert, server cert, or sub-CA.
+  format    Change the encoding of a certificate or private key between PEM and DER.
 
 See each command's help text for more info.
 `)
